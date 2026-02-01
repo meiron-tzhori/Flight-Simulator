@@ -57,7 +57,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	server := api.NewServer(cfg.Server, sim, logger)
+	server := api.NewServer(cfg.Server, cfg.Simulation, sim, logger)
 
 	// Start components
 	var wg sync.WaitGroup
