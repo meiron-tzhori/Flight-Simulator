@@ -13,6 +13,38 @@ COLOR_YELLOW="\033[1;33m"
 COLOR_RED="\033[0;31m"
 COLOR_RESET="\033[0m"
 
+# Check if jq is available
+if command -v jq &> /dev/null; then
+    HAS_JQ=true
+else
+    HAS_JQ=false
+    echo -e "${COLOR_YELLOW}⚠ jq not found - JSON output will not be formatted${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}  Install jq: choco install jq (or download from https://stedolan.github.io/jq/)${COLOR_RESET}"
+    echo ""
+fi
+
+# Helper function for JSON formatting
+format_json() {
+    if [ "$HAS_JQ" = true ]; then
+        jq .
+    else
+        cat  # Just pass through without formatting
+    fi
+}
+
+# Helper function for JSON field extraction
+json_extract() {
+    local json="$1"
+    local field="$2"
+    
+    if [ "$HAS_JQ" = true ]; then
+        echo "$json" | jq -r "$field"
+    else
+        # Simple fallback - just show raw JSON
+        echo "$json"
+    fi
+}
+
 # Helper function for printing colored output
 print_header() {
     echo -e "\n${COLOR_BLUE}========================================${COLOR_RESET}"
@@ -40,7 +72,7 @@ check_server() {
         return 0
     else
         print_error "Server is not running at $BASE_URL"
-        print_info "Please start the simulator first: go run cmd/simulator/main.go"
+        print_info "Please start the simulator first: make run"
         exit 1
     fi
 }
@@ -50,7 +82,7 @@ example_health() {
     print_header "Example 1: Health Check"
     print_info "Command: GET /health"
     
-    curl -s "$BASE_URL/health" | jq .
+    curl -s "$BASE_URL/health" | format_json
     
     print_success "Health check complete"
 }
@@ -60,7 +92,7 @@ example_get_state() {
     print_header "Example 2: Get Current Aircraft State"
     print_info "Command: GET /state"
     
-    curl -s "$BASE_URL/state" | jq .
+    curl -s "$BASE_URL/state" | format_json
     
     print_success "State retrieved"
 }
@@ -77,7 +109,7 @@ example_goto_simple() {
             "lat": 32.0853,
             "lon": 34.7818,
             "alt": 1000.0
-        }' | jq .
+        }' | format_json
     
     print_success "Go-to command sent"
 }
@@ -95,7 +127,7 @@ example_goto_speed() {
             "lon": 35.2137,
             "alt": 800.0,
             "speed": 150.0
-        }' | jq .
+        }' | format_json
     
     print_success "Go-to command with speed sent"
 }
@@ -114,7 +146,7 @@ example_trajectory_triangle() {
                 {"lat": 32.1053, "lon": 34.7818, "alt": 1500.0, "speed": 120.0},
                 {"lat": 32.0953, "lon": 34.8018, "alt": 1500.0, "speed": 100.0}
             ]
-        }' | jq .
+        }' | format_json
     
     print_success "Triangle trajectory sent"
 }
@@ -136,7 +168,7 @@ example_trajectory_loop() {
                 {"lat": 32.0, "lon": 34.7, "alt": 1000.0}
             ],
             "loop": true
-        }' | jq .
+        }' | format_json
     
     print_success "Looping trajectory sent"
 }
@@ -147,7 +179,7 @@ example_stop() {
     print_info "Command: POST /command/stop"
     print_info "Action: Emergency stop at current position"
     
-    curl -s -X POST "$BASE_URL/command/stop" | jq .
+    curl -s -X POST "$BASE_URL/command/stop" | format_json
     
     print_success "Stop command sent"
 }
@@ -158,7 +190,7 @@ example_hold() {
     print_info "Command: POST /command/hold"
     print_info "Action: Orbit at current position"
     
-    curl -s -X POST "$BASE_URL/command/hold" | jq .
+    curl -s -X POST "$BASE_URL/command/hold" | format_json
     
     print_success "Hold command sent"
 }
@@ -174,7 +206,7 @@ example_invalid() {
             "lat": 120.0,
             "lon": 34.7818,
             "alt": 1000.0
-        }' | jq .
+        }' | format_json
     
     print_info "Expected: 400 Bad Request with error details"
 }
@@ -186,23 +218,34 @@ example_monitor() {
     
     # Send goto command
     print_info "Sending go-to command..."
-    curl -s -X POST "$BASE_URL/command/goto" \
+    RESPONSE=$(curl -s -X POST "$BASE_URL/command/goto" \
         -H "Content-Type: application/json" \
         -d '{
             "lat": 32.1,
             "lon": 34.8,
             "alt": 1200.0,
             "speed": 100.0
-        }' | jq -r '.message'
+        }')
+    
+    if [ "$HAS_JQ" = true ]; then
+        echo "$RESPONSE" | jq -r '.message'
+    else
+        echo "$RESPONSE"
+    fi
     
     # Monitor state 5 times (1 second apart)
     for i in {1..5}; do
         echo ""
         print_info "State at T+${i}s:"
         STATE=$(curl -s "$BASE_URL/state")
-        echo "  Position: $(echo $STATE | jq -r '.position.latitude')°N, $(echo $STATE | jq -r '.position.longitude')°E, $(echo $STATE | jq -r '.position.altitude')m"
-        echo "  Speed: $(echo $STATE | jq -r '.velocity.ground_speed')m/s"
-        echo "  Heading: $(echo $STATE | jq -r '.heading')°"
+        
+        if [ "$HAS_JQ" = true ]; then
+            echo "  Position: $(echo $STATE | jq -r '.position.latitude')°N, $(echo $STATE | jq -r '.position.longitude')°E, $(echo $STATE | jq -r '.position.altitude')m"
+            echo "  Speed: $(echo $STATE | jq -r '.velocity.ground_speed')m/s"
+            echo "  Heading: $(echo $STATE | jq -r '.heading')°"
+        else
+            echo "  $STATE"
+        fi
         sleep 1
     done
     
@@ -215,17 +258,21 @@ example_stream() {
     print_info "Command: GET /stream"
     print_info "Streaming for 15 seconds (Ctrl+C to stop earlier)..."
     
-    timeout 15s curl -N -s "$BASE_URL/stream" | while read -r line; do
+    timeout 15s curl -N -s "$BASE_URL/stream" 2>/dev/null | while read -r line; do
         if [[ $line == data:* ]]; then
-            # Extract and parse JSON
+            # Extract JSON
             json="${line:6}"
-            lat=$(echo "$json" | jq -r '.position.latitude')
-            lon=$(echo "$json" | jq -r '.position.longitude')
-            alt=$(echo "$json" | jq -r '.position.altitude')
-            speed=$(echo "$json" | jq -r '.velocity.ground_speed')
-            heading=$(echo "$json" | jq -r '.heading')
             
-            echo "[$lat°N, $lon°E, ${alt}m] Speed: ${speed}m/s, Heading: ${heading}°"
+            if [ "$HAS_JQ" = true ]; then
+                lat=$(echo "$json" | jq -r '.position.latitude')
+                lon=$(echo "$json" | jq -r '.position.longitude')
+                alt=$(echo "$json" | jq -r '.position.altitude')
+                speed=$(echo "$json" | jq -r '.velocity.ground_speed')
+                heading=$(echo "$json" | jq -r '.heading')
+                echo "[$lat°N, $lon°E, ${alt}m] Speed: ${speed}m/s, Heading: ${heading}°"
+            else
+                echo "$json"
+            fi
         fi
     done
     
@@ -239,33 +286,38 @@ example_complete_flight() {
     print_info "Phase 1: Takeoff and climb"
     curl -s -X POST "$BASE_URL/command/goto" \
         -H "Content-Type: application/json" \
-        -d '{"lat": 32.0853, "lon": 34.7818, "alt": 1000.0, "speed": 50.0}' | jq -r '.message'
+        -d '{"lat": 32.0853, "lon": 34.7818, "alt": 1000.0, "speed": 50.0}' > /dev/null
+    echo "  ✓ Command sent"
     sleep 3
     
     print_info "Phase 2: Cruise to waypoint"
     curl -s -X POST "$BASE_URL/command/goto" \
         -H "Content-Type: application/json" \
-        -d '{"lat": 32.1053, "lon": 34.8018, "alt": 1500.0, "speed": 120.0}' | jq -r '.message'
+        -d '{"lat": 32.1053, "lon": 34.8018, "alt": 1500.0, "speed": 120.0}' > /dev/null
+    echo "  ✓ Command sent"
     sleep 3
     
     print_info "Phase 3: Hold pattern"
-    curl -s -X POST "$BASE_URL/command/hold" | jq -r '.message'
+    curl -s -X POST "$BASE_URL/command/hold" > /dev/null
+    echo "  ✓ Command sent"
     sleep 2
     
     print_info "Phase 4: Approach and descend"
     curl -s -X POST "$BASE_URL/command/goto" \
         -H "Content-Type: application/json" \
-        -d '{"lat": 32.0853, "lon": 34.7818, "alt": 300.0, "speed": 60.0}' | jq -r '.message'
+        -d '{"lat": 32.0853, "lon": 34.7818, "alt": 300.0, "speed": 60.0}' > /dev/null
+    echo "  ✓ Command sent"
     sleep 3
     
     print_info "Phase 5: Final approach"
     curl -s -X POST "$BASE_URL/command/goto" \
         -H "Content-Type: application/json" \
-        -d '{"lat": 32.0853, "lon": 34.7818, "alt": 50.0, "speed": 30.0}' | jq -r '.message'
+        -d '{"lat": 32.0853, "lon": 34.7818, "alt": 50.0, "speed": 30.0}' > /dev/null
+    echo "  ✓ Command sent"
     sleep 2
     
     print_info "Final state:"
-    curl -s "$BASE_URL/state" | jq '{position, velocity}'
+    curl -s "$BASE_URL/state" | format_json
     
     print_success "Complete flight scenario finished"
 }
