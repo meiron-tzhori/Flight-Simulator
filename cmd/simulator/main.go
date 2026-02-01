@@ -51,7 +51,7 @@ func main() {
 	defer cancel()
 
 	// Initialize components
-	sim, err := simulator.New(cfg.Simulation, logger)
+	sim, err := simulator.New(cfg.Simulation, cfg.Environment, logger)
 	if err != nil {
 		logger.Error("Failed to create simulator", "error", err)
 		os.Exit(1)
