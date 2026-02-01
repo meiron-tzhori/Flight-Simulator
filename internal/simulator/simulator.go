@@ -185,7 +185,7 @@ func (s *Simulator) tick() {
 	if s.activeCommand != nil {
 		switch s.activeCommand.Type {
 		case models.CommandTypeGoTo:
-			s.executeGoTo(s.activeCommand.GoTo, deltaTime, effectiveVelocity)
+			s.executeGoTo(s.activeCommand.GoTo, deltaTime)
 		case models.CommandTypeTrajectory:
 			s.executeTrajectory(s.activeCommand.Trajectory, deltaTime, effectiveVelocity)
 		case models.CommandTypeHold:
@@ -264,7 +264,7 @@ func (s *Simulator) updatePosition(deltaTime float64, velocity models.Velocity) 
 }
 
 // executeGoTo executes a go-to command.
-func (s *Simulator) executeGoTo(cmd *models.GoToCommand, deltaTime float64, velocity models.Velocity) {
+func (s *Simulator) executeGoTo(cmd *models.GoToCommand, deltaTime float64) {
 	// Calculate distance to target
 	distance := geo.Haversine(
 		s.state.Position.Latitude,
@@ -366,7 +366,7 @@ func (s *Simulator) executeTrajectory(cmd *models.TrajectoryCommand, deltaTime f
 	}
 
 	// Execute go-to logic for current waypoint
-	s.executeGoTo(gotoCmd, deltaTime, velocity)
+	s.executeGoTo(gotoCmd, deltaTime)
 }
 
 // executeHold executes a hold command (orbit at current position).
