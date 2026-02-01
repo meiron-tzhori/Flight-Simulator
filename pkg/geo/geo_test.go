@@ -7,12 +7,12 @@ import (
 
 func TestHaversine(t *testing.T) {
 	tests := []struct {
-		name     string
-		lat1     float64
-		lon1     float64
-		lat2     float64
-		lon2     float64
-		expected float64 // meters
+		name      string
+		lat1      float64
+		lon1      float64
+		lat2      float64
+		lon2      float64
+		expected  float64 // meters
 		tolerance float64 // meters
 	}{
 		{
@@ -25,12 +25,12 @@ func TestHaversine(t *testing.T) {
 			tolerance: 1,
 		},
 		{
-			name:      "Tel Aviv to Jerusalem (~50km)",
+			name:      "Tel Aviv to Jerusalem (~54km actual)",
 			lat1:      32.0853,
 			lon1:      34.7818,
 			lat2:      31.7683,
 			lon2:      35.2137,
-			expected:  50000,
+			expected:  54000,
 			tolerance: 2000,
 		},
 		{
@@ -76,12 +76,12 @@ func TestHaversine(t *testing.T) {
 
 func TestBearing(t *testing.T) {
 	tests := []struct {
-		name     string
-		lat1     float64
-		lon1     float64
-		lat2     float64
-		lon2     float64
-		expected float64 // degrees
+		name      string
+		lat1      float64
+		lon1      float64
+		lat2      float64
+		lon2      float64
+		expected  float64 // degrees
 		tolerance float64 // degrees
 	}{
 		{
@@ -121,21 +121,21 @@ func TestBearing(t *testing.T) {
 			tolerance: 1,
 		},
 		{
-			name:      "Northeast",
+			name:      "Northeast (actual ~40°)",
 			lat1:      32.0,
 			lon1:      34.0,
 			lat2:      33.0,
 			lon2:      35.0,
-			expected:  45,
-			tolerance: 5,
+			expected:  40,
+			tolerance: 2,
 		},
 		{
-			name:      "Tel Aviv to Jerusalem (East-Southeast)",
+			name:      "Tel Aviv to Jerusalem (Southeast)",
 			lat1:      32.0853,
 			lon1:      34.7818,
 			lat2:      31.7683,
 			lon2:      35.2137,
-			expected:  140, // Approximately
+			expected:  140,
 			tolerance: 10,
 		},
 	}
@@ -163,19 +163,30 @@ func TestBearing(t *testing.T) {
 }
 
 func TestBearingReversibility(t *testing.T) {
-	// Test that bearing from A to B and B to A are roughly opposite
+	// Test that bearing from A to B and B to A differ by ~180 degrees
 	lat1, lon1 := 32.0, 34.0
 	lat2, lon2 := 33.0, 35.0
 	
 	bearingAB := Bearing(lat1, lon1, lat2, lon2)
 	bearingBA := Bearing(lat2, lon2, lat1, lon1)
 	
-	// Should differ by ~180 degrees
-	diff := math.Abs(math.Mod(bearingAB-bearingBA+540, 360) - 180)
+	// Normalize both
+	bearingAB = math.Mod(bearingAB+360, 360)
+	bearingBA = math.Mod(bearingBA+360, 360)
 	
-	if diff > 5 { // 5 degree tolerance
-		t.Errorf("Bearing reversibility failed: AB=%.2f°, BA=%.2f°, diff from 180°=%.2f°",
-			bearingAB, bearingBA, diff)
+	// Calculate difference
+	diff := math.Abs(bearingAB - bearingBA)
+	if diff > 180 {
+		diff = 360 - diff
+	}
+	
+	// Should differ by ~180 degrees (allow 10 degree tolerance for non-meridian paths)
+	expectedDiff := 180.0
+	actualDiff := math.Abs(diff - expectedDiff)
+	
+	if actualDiff > 10 {
+		t.Errorf("Bearing reversibility: AB=%.2f°, BA=%.2f°, diff=%.2f°, expected ~180° (off by %.2f°)",
+			bearingAB, bearingBA, diff, actualDiff)
 	}
 }
 

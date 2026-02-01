@@ -1,6 +1,8 @@
 package validation
 
 import (
+	"errors"
+	"strings"
 	"testing"
 
 	"github.com/meiron-tzhori/Flight-Simulator/internal/models"
@@ -11,7 +13,7 @@ func TestValidatePosition(t *testing.T) {
 		name      string
 		position  models.Position
 		wantError bool
-		errorCode string
+		errorType error
 	}{
 		{
 			name: "Valid position",
@@ -48,7 +50,7 @@ func TestValidatePosition(t *testing.T) {
 				Altitude:  1000.0,
 			},
 			wantError: true,
-			errorCode: "INVALID_LATITUDE",
+			errorType: models.ErrInvalidLatitude,
 		},
 		{
 			name: "Latitude too low",
@@ -58,7 +60,7 @@ func TestValidatePosition(t *testing.T) {
 				Altitude:  1000.0,
 			},
 			wantError: true,
-			errorCode: "INVALID_LATITUDE",
+			errorType: models.ErrInvalidLatitude,
 		},
 		{
 			name: "Longitude too high",
@@ -68,7 +70,7 @@ func TestValidatePosition(t *testing.T) {
 				Altitude:  1000.0,
 			},
 			wantError: true,
-			errorCode: "INVALID_LONGITUDE",
+			errorType: models.ErrInvalidLongitude,
 		},
 		{
 			name: "Longitude too low",
@@ -78,7 +80,7 @@ func TestValidatePosition(t *testing.T) {
 				Altitude:  1000.0,
 			},
 			wantError: true,
-			errorCode: "INVALID_LONGITUDE",
+			errorType: models.ErrInvalidLongitude,
 		},
 		{
 			name: "Negative altitude",
@@ -88,7 +90,7 @@ func TestValidatePosition(t *testing.T) {
 				Altitude:  -100.0,
 			},
 			wantError: true,
-			errorCode: "INVALID_ALTITUDE",
+			errorType: models.ErrInvalidAltitude,
 		},
 		{
 			name: "Very high altitude (valid)",
@@ -111,13 +113,9 @@ func TestValidatePosition(t *testing.T) {
 					return
 				}
 				
-				if validationErr, ok := err.(*models.ValidationError); ok {
-					if validationErr.Code != tt.errorCode {
-						t.Errorf("ValidatePosition() error code = %v, want %v",
-							validationErr.Code, tt.errorCode)
-					}
-				} else {
-					t.Errorf("ValidatePosition() error type is not ValidationError")
+				// Check error contains expected type
+				if !errors.Is(err, tt.errorType) {
+					t.Errorf("ValidatePosition() error = %v, want to contain %v", err, tt.errorType)
 				}
 			} else {
 				if err != nil {
@@ -134,7 +132,7 @@ func TestValidateSpeed(t *testing.T) {
 		speed     float64
 		maxSpeed  float64
 		wantError bool
-		errorCode string
+		errorType error
 	}{
 		{
 			name:      "Valid speed",
@@ -159,21 +157,21 @@ func TestValidateSpeed(t *testing.T) {
 			speed:     -10.0,
 			maxSpeed:  250.0,
 			wantError: true,
-			errorCode: "INVALID_SPEED",
+			errorType: models.ErrInvalidSpeed,
 		},
 		{
 			name:      "Exceeds max speed",
 			speed:     300.0,
 			maxSpeed:  250.0,
 			wantError: true,
-			errorCode: "SPEED_EXCEEDS_MAX",
+			errorType: models.ErrSpeedExceedsMax,
 		},
 		{
 			name:      "Slightly exceeds max",
 			speed:     250.1,
 			maxSpeed:  250.0,
 			wantError: true,
-			errorCode: "SPEED_EXCEEDS_MAX",
+			errorType: models.ErrSpeedExceedsMax,
 		},
 	}
 
@@ -187,13 +185,9 @@ func TestValidateSpeed(t *testing.T) {
 					return
 				}
 				
-				if validationErr, ok := err.(*models.ValidationError); ok {
-					if validationErr.Code != tt.errorCode {
-						t.Errorf("ValidateSpeed() error code = %v, want %v",
-							validationErr.Code, tt.errorCode)
-					}
-				} else {
-					t.Errorf("ValidateSpeed() error type is not ValidationError")
+				// Check error contains expected type
+				if !errors.Is(err, tt.errorType) {
+					t.Errorf("ValidateSpeed() error = %v, want to contain %v", err, tt.errorType)
 				}
 			} else {
 				if err != nil {
@@ -283,7 +277,7 @@ func TestValidateTrajectoryCommand(t *testing.T) {
 		cmd       *models.TrajectoryCommand
 		maxSpeed  float64
 		wantError bool
-		errorCode string
+		errorMsg  string
 	}{
 		{
 			name: "Valid trajectory",
@@ -311,7 +305,7 @@ func TestValidateTrajectoryCommand(t *testing.T) {
 			},
 			maxSpeed:  250.0,
 			wantError: true,
-			errorCode: "EMPTY_WAYPOINTS",
+			errorMsg:  "waypoint",
 		},
 		{
 			name: "Invalid waypoint position",
@@ -325,6 +319,7 @@ func TestValidateTrajectoryCommand(t *testing.T) {
 			},
 			maxSpeed:  250.0,
 			wantError: true,
+			errorMsg:  "latitude",
 		},
 		{
 			name: "Invalid waypoint speed",
@@ -339,6 +334,7 @@ func TestValidateTrajectoryCommand(t *testing.T) {
 			},
 			maxSpeed:  250.0,
 			wantError: true,
+			errorMsg:  "speed",
 		},
 	}
 
@@ -352,13 +348,9 @@ func TestValidateTrajectoryCommand(t *testing.T) {
 					return
 				}
 				
-				if tt.errorCode != "" {
-					if validationErr, ok := err.(*models.ValidationError); ok {
-						if validationErr.Code != tt.errorCode {
-							t.Errorf("ValidateTrajectoryCommand() error code = %v, want %v",
-								validationErr.Code, tt.errorCode)
-						}
-					}
+				// Check error message contains expected text
+				if tt.errorMsg != "" && !strings.Contains(strings.ToLower(err.Error()), strings.ToLower(tt.errorMsg)) {
+					t.Errorf("ValidateTrajectoryCommand() error = %v, want to contain %v", err, tt.errorMsg)
 				}
 			} else {
 				if err != nil {

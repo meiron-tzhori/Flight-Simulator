@@ -9,13 +9,13 @@ import (
 
 func TestWindEffect_Apply(t *testing.T) {
 	tests := []struct {
-		name             string
-		windDirection    float64 // degrees (wind FROM direction)
-		windSpeed        float64 // m/s
-		aircraftHeading  float64 // degrees
-		aircraftSpeed    float64 // m/s (airspeed)
-		expectedGS       float64 // m/s (ground speed)
-		tolerance        float64 // m/s
+		name            string
+		windDirection   float64 // degrees (wind FROM direction)
+		windSpeed       float64 // m/s
+		aircraftHeading float64 // degrees
+		aircraftSpeed   float64 // m/s (airspeed)
+		expectedGS      float64 // m/s (ground speed)
+		tolerance       float64 // m/s
 	}{
 		{
 			name:            "No wind",
@@ -63,13 +63,13 @@ func TestWindEffect_Apply(t *testing.T) {
 			tolerance:       0.5,
 		},
 		{
-			name:            "45-degree angle wind",
+			name:            "45-degree headwind component",
 			windDirection:   45,
 			windSpeed:       10,
 			aircraftHeading: 0,
 			aircraftSpeed:   50,
-			expectedGS:      50.14, // Approximately (small crosswind effect)
-			tolerance:       1.0,
+			expectedGS:      43.5, // Wind has both headwind and crosswind components
+			tolerance:       0.5,
 		},
 	}
 
