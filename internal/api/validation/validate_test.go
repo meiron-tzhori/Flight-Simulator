@@ -106,13 +106,13 @@ func TestValidatePosition(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			err := ValidatePosition(tt.position)
-			
+
 			if tt.wantError {
 				if err == nil {
 					t.Errorf("ValidatePosition() expected error, got nil")
 					return
 				}
-				
+
 				// Check error contains expected type
 				if !errors.Is(err, tt.errorType) {
 					t.Errorf("ValidatePosition() error = %v, want to contain %v", err, tt.errorType)
@@ -178,13 +178,13 @@ func TestValidateSpeed(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			err := ValidateSpeed(tt.speed, tt.maxSpeed)
-			
+
 			if tt.wantError {
 				if err == nil {
 					t.Errorf("ValidateSpeed() expected error, got nil")
 					return
 				}
-				
+
 				// Check error contains expected type
 				if !errors.Is(err, tt.errorType) {
 					t.Errorf("ValidateSpeed() error = %v, want to contain %v", err, tt.errorType)
@@ -260,7 +260,7 @@ func TestValidateGoToCommand(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			err := ValidateGoToCommand(tt.cmd, tt.maxSpeed)
-			
+
 			if tt.wantError && err == nil {
 				t.Errorf("ValidateGoToCommand() expected error, got nil")
 			}
@@ -341,13 +341,13 @@ func TestValidateTrajectoryCommand(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			err := ValidateTrajectoryCommand(tt.cmd, tt.maxSpeed)
-			
+
 			if tt.wantError {
 				if err == nil {
 					t.Errorf("ValidateTrajectoryCommand() expected error, got nil")
 					return
 				}
-				
+
 				// Check error message contains expected text
 				if tt.errorMsg != "" && !strings.Contains(strings.ToLower(err.Error()), strings.ToLower(tt.errorMsg)) {
 					t.Errorf("ValidateTrajectoryCommand() error = %v, want to contain %v", err, tt.errorMsg)

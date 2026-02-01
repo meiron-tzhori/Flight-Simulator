@@ -4,13 +4,13 @@ import "errors"
 
 // Validation errors
 var (
-	ErrInvalidLatitude    = errors.New("latitude must be between -90 and 90 degrees")
-	ErrInvalidLongitude   = errors.New("longitude must be between -180 and 180 degrees")
-	ErrInvalidAltitude    = errors.New("altitude must be non-negative")
-	ErrInvalidSpeed       = errors.New("speed must be positive")
-	ErrEmptyWaypoints     = errors.New("trajectory must contain at least one waypoint")
-	ErrInvalidWaypoint    = errors.New("invalid waypoint")
-	ErrSpeedExceedsMax    = errors.New("speed exceeds maximum allowed")
+	ErrInvalidLatitude  = errors.New("latitude must be between -90 and 90 degrees")
+	ErrInvalidLongitude = errors.New("longitude must be between -180 and 180 degrees")
+	ErrInvalidAltitude  = errors.New("altitude must be non-negative")
+	ErrInvalidSpeed     = errors.New("speed must be positive")
+	ErrEmptyWaypoints   = errors.New("trajectory must contain at least one waypoint")
+	ErrInvalidWaypoint  = errors.New("invalid waypoint")
+	ErrSpeedExceedsMax  = errors.New("speed exceeds maximum allowed")
 )
 
 // Runtime errors

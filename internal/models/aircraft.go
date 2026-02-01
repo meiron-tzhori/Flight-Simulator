@@ -4,11 +4,11 @@ import "time"
 
 // AircraftState represents the complete state of the aircraft at a point in time.
 type AircraftState struct {
-	Position      Position      `json:"position"`
-	Velocity      Velocity      `json:"velocity"`
-	Heading       float64       `json:"heading"` // degrees, 0-360 (0=North)
-	Timestamp     time.Time     `json:"timestamp"`
-	ActiveCommand *CommandInfo  `json:"active_command,omitempty"`
+	Position      Position          `json:"position"`
+	Velocity      Velocity          `json:"velocity"`
+	Heading       float64           `json:"heading"` // degrees, 0-360 (0=North)
+	Timestamp     time.Time         `json:"timestamp"`
+	ActiveCommand *CommandInfo      `json:"active_command,omitempty"`
 	Environment   *EnvironmentState `json:"environment,omitempty"`
 }
 
@@ -27,7 +27,7 @@ type Velocity struct {
 
 // CommandInfo contains information about the currently executing command.
 type CommandInfo struct {
-	Type       string    `json:"type"`       // "goto", "trajectory", "hold", "stop"
+	Type       string    `json:"type"` // "goto", "trajectory", "hold", "stop"
 	Target     *Position `json:"target,omitempty"`
 	ETASeconds float64   `json:"eta_seconds,omitempty"`
 }

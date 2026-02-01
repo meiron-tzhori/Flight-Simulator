@@ -10,12 +10,12 @@ import (
 
 // Config represents the complete application configuration.
 type Config struct {
-	Server     ServerConfig     `yaml:"server"`
-	Simulation SimulationConfig `yaml:"simulation"`
+	Server      ServerConfig      `yaml:"server"`
+	Simulation  SimulationConfig  `yaml:"simulation"`
 	Environment EnvironmentConfig `yaml:"environment"`
-	Logging    LoggingConfig    `yaml:"logging"`
-	Metrics    MetricsConfig    `yaml:"metrics"`
-	Streaming  StreamingConfig  `yaml:"streaming"`
+	Logging     LoggingConfig     `yaml:"logging"`
+	Metrics     MetricsConfig     `yaml:"metrics"`
+	Streaming   StreamingConfig   `yaml:"streaming"`
 }
 
 // ServerConfig contains HTTP server settings.
@@ -29,18 +29,18 @@ type ServerConfig struct {
 
 // SimulationConfig contains simulation engine settings.
 type SimulationConfig struct {
-	TickRateHz         float64          `yaml:"tick_rate_hz"`
-	CommandQueueSize   int              `yaml:"command_queue_size"`
-	InitialPosition    PositionConfig   `yaml:"initial_position"`
-	InitialVelocity    VelocityConfig   `yaml:"initial_velocity"`
-	InitialHeading     float64          `yaml:"initial_heading"`
-	DefaultSpeed       float64          `yaml:"default_speed"`
-	MaxSpeed           float64          `yaml:"max_speed"`
-	MaxClimbRate       float64          `yaml:"max_climb_rate"`
-	MaxDescentRate     float64          `yaml:"max_descent_rate"`
-	PositionTolerance  float64          `yaml:"position_tolerance"`
-	HeadingChangeRate  float64          `yaml:"heading_change_rate"`
-	SpeedChangeRate    float64          `yaml:"speed_change_rate"`
+	TickRateHz        float64        `yaml:"tick_rate_hz"`
+	CommandQueueSize  int            `yaml:"command_queue_size"`
+	InitialPosition   PositionConfig `yaml:"initial_position"`
+	InitialVelocity   VelocityConfig `yaml:"initial_velocity"`
+	InitialHeading    float64        `yaml:"initial_heading"`
+	DefaultSpeed      float64        `yaml:"default_speed"`
+	MaxSpeed          float64        `yaml:"max_speed"`
+	MaxClimbRate      float64        `yaml:"max_climb_rate"`
+	MaxDescentRate    float64        `yaml:"max_descent_rate"`
+	PositionTolerance float64        `yaml:"position_tolerance"`
+	HeadingChangeRate float64        `yaml:"heading_change_rate"`
+	SpeedChangeRate   float64        `yaml:"speed_change_rate"`
 }
 
 // PositionConfig represents a configured position.
@@ -58,10 +58,10 @@ type VelocityConfig struct {
 
 // EnvironmentConfig contains environment settings.
 type EnvironmentConfig struct {
-	Enabled bool        `yaml:"enabled"`
-	Wind    WindConfig  `yaml:"wind"`
+	Enabled  bool           `yaml:"enabled"`
+	Wind     WindConfig     `yaml:"wind"`
 	Humidity HumidityConfig `yaml:"humidity"`
-	Terrain TerrainConfig `yaml:"terrain"`
+	Terrain  TerrainConfig  `yaml:"terrain"`
 }
 
 // WindConfig contains wind settings.

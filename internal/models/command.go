@@ -14,9 +14,9 @@ const (
 
 // Command represents a command to the aircraft.
 type Command struct {
-	ID         string           `json:"id"`
-	Type       CommandType      `json:"type"`
-	GoTo       *GoToCommand     `json:"goto,omitempty"`
+	ID         string             `json:"id"`
+	Type       CommandType        `json:"type"`
+	GoTo       *GoToCommand       `json:"goto,omitempty"`
 	Trajectory *TrajectoryCommand `json:"trajectory,omitempty"`
 }
 
