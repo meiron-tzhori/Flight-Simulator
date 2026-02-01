@@ -1,0 +1,73 @@
+# Flight Simulator Configuration
+# All settings can be overridden via environment variables
+# Format: SIM_<SECTION>_<KEY> (e.g., SIM_SERVER_PORT=8080)
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+  read_timeout: 5s
+  write_timeout: 10s
+  shutdown_timeout: 30s
+
+simulation:
+  # Tick rate in Hz (ticks per second)
+  tick_rate_hz: 30
+  
+  # Command queue buffer size
+  command_queue_size: 100
+  
+  # Initial aircraft state
+  initial_position:
+    latitude: 32.0853   # Tel Aviv
+    longitude: 34.7818
+    altitude: 1000.0    # meters MSL
+  
+  initial_velocity:
+    ground_speed: 50.0   # m/s
+    vertical_speed: 0.0  # m/s
+  
+  initial_heading: 0.0   # degrees (North)
+  
+  # Flight parameters
+  default_speed: 100.0      # m/s
+  max_speed: 250.0          # m/s
+  max_climb_rate: 15.0      # m/s
+  max_descent_rate: 10.0    # m/s
+  
+  # Control parameters
+  position_tolerance: 50.0    # meters - waypoint reached threshold
+  heading_change_rate: 5.0    # degrees per second - max turn rate
+  speed_change_rate: 2.0      # m/s per second - acceleration/deceleration
+
+environment:
+  enabled: true
+  
+  wind:
+    enabled: true
+    direction: 270.0  # degrees (West wind)
+    speed: 10.0       # m/s
+  
+  humidity:
+    enabled: false
+    value: 60.0       # percent
+  
+  terrain:
+    enabled: false
+    safety_margin: 100.0  # meters above terrain
+
+logging:
+  level: "info"      # debug, info, warn, error
+  format: "json"     # json, text
+  include_caller: false
+
+metrics:
+  enabled: false
+  port: 9090
+  path: "/metrics"
+
+# SSE (Server-Sent Events) streaming
+streaming:
+  enabled: true
+  update_rate_hz: 10      # Updates per second
+  buffer_size: 10         # Buffer per client
+  max_clients: 100        # Maximum concurrent SSE clients
