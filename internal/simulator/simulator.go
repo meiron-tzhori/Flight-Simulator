@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/meiron-tzhori/Flight-Simulator/internal/config"
+	"github.com/meiron-tzhori/Flight-Simulator/internal/environment"
 	"github.com/meiron-tzhori/Flight-Simulator/internal/models"
 	"github.com/meiron-tzhori/Flight-Simulator/internal/pubsub"
 	"github.com/meiron-tzhori/Flight-Simulator/pkg/geo"
@@ -27,7 +28,8 @@ type Simulator struct {
 	stateRequests chan stateRequest
 
 	// Components
-	publisher *pubsub.StatePublisher
+	publisher   *pubsub.StatePublisher
+	environment *environment.Environment
 
 	// Configuration
 	tickerInterval time.Duration
@@ -48,7 +50,7 @@ type trajectoryState struct {
 }
 
 // New creates a new simulator instance.
-func New(cfg config.SimulationConfig, logger *slog.Logger) (*Simulator, error) {
+func New(cfg config.SimulationConfig, envCfg config.EnvironmentConfig, logger *slog.Logger) (*Simulator, error) {
 	// Validate configuration
 	if cfg.TickRateHz <= 0 {
 		return nil, fmt.Errorf("tick rate must be positive")
@@ -72,6 +74,9 @@ func New(cfg config.SimulationConfig, logger *slog.Logger) (*Simulator, error) {
 		Timestamp: time.Now(),
 	}
 
+	// Create environment
+	env := environment.New(envCfg)
+
 	s := &Simulator{
 		state:           initialState,
 		activeCommand:   nil,
@@ -80,6 +85,7 @@ func New(cfg config.SimulationConfig, logger *slog.Logger) (*Simulator, error) {
 		commandQueue:    make(chan *models.Command, cfg.CommandQueueSize),
 		stateRequests:   make(chan stateRequest),
 		publisher:       pubsub.NewStatePublisher(10), // 10-item buffer per subscriber
+		environment:     env,
 		tickerInterval:  tickerInterval,
 		config:          cfg,
 		logger:          logger,
@@ -88,7 +94,17 @@ func New(cfg config.SimulationConfig, logger *slog.Logger) (*Simulator, error) {
 	logger.Info("Simulator initialized",
 		"tick_interval", tickerInterval,
 		"initial_position", initialState.Position,
+		"environment_enabled", env != nil && env.IsEnabled(),
 	)
+
+	if env != nil && env.IsEnabled() {
+		if wind := env.GetWind(); wind != nil {
+			logger.Info("Wind effect enabled",
+				"direction", wind.GetVector().Direction,
+				"speed_ms", wind.GetVector().Speed,
+			)
+		}
+	}
 
 	return s, nil
 }
@@ -161,7 +177,9 @@ func (s *Simulator) tick() {
 
 	// Apply environment effects if enabled
 	effectiveVelocity := s.state.Velocity
-	// TODO Phase 4: Add environment effects
+	if s.environment != nil && s.environment.IsEnabled() {
+		effectiveVelocity = s.environment.ApplyEffects(s.state.Heading, s.state.Velocity)
+	}
 
 	// Execute active command if present
 	if s.activeCommand != nil {
@@ -178,6 +196,11 @@ func (s *Simulator) tick() {
 	} else {
 		// No active command - maintain current heading and speed
 		s.updatePosition(deltaTime, effectiveVelocity)
+	}
+
+	// Add environment state to aircraft state
+	if s.environment != nil {
+		s.state.Environment = s.environment.GetState()
 	}
 
 	// Update timestamp
