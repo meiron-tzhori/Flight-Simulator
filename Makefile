@@ -9,6 +9,13 @@ MAIN_PATH=cmd/simulator/main.go
 COVERAGE_FILE=coverage.out
 COVERAGE_HTML=coverage.html
 
+# Detect OS for CGO handling
+ifeq ($(OS),Windows_NT)
+	DETECTED_OS := Windows
+else
+	DETECTED_OS := $(shell uname -s)
+endif
+
 # Default target
 help:
 	@echo "Flight Simulator - Available targets:"
@@ -54,15 +61,22 @@ test:
 	@echo "Running tests..."
 	go test -v ./...
 
-# Run tests with race detector (CRITICAL)
+# Run tests with race detector (requires CGO)
 test-race:
 	@echo "Running tests with race detector..."
-	go test -race -v ./...
+	@echo "Note: Race detector requires CGO. Enabling CGO_ENABLED=1..."
+	@if command -v gcc >/dev/null 2>&1 || command -v clang >/dev/null 2>&1; then \
+		CGO_ENABLED=1 go test -race -v ./...; \
+	else \
+		echo "Warning: No C compiler found. Race detector requires gcc or clang."; \
+		echo "Falling back to regular tests..."; \
+		go test -v ./...; \
+	fi
 
 # Run tests with race detector multiple times
 test-race-stress:
 	@echo "Stress testing with race detector (100 iterations)..."
-	go test -race -count=100 ./...
+	CGO_ENABLED=1 go test -race -count=100 ./...
 
 # Generate test coverage
 test-coverage:
@@ -116,8 +130,12 @@ dev-tools:
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
 # Run all checks (CI simulation)
-ci: fmt vet test-race
+ci: fmt vet test
 	@echo "All CI checks passed!"
+
+# Run all checks with race detector (requires CGO)
+ci-race: fmt vet test-race
+	@echo "All CI checks with race detector passed!"
 
 # Docker build
 docker-build:
