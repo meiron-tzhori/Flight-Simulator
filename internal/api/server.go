@@ -22,7 +22,7 @@ type Server struct {
 }
 
 // NewServer creates a new API server.
-func NewServer(cfg config.ServerConfig, sim *simulator.Simulator, logger *slog.Logger) *Server {
+func NewServer(cfg config.ServerConfig, simCfg config.SimulationConfig, sim *simulator.Simulator, logger *slog.Logger) *Server {
 	// Set Gin mode
 	gin.SetMode(gin.ReleaseMode)
 
@@ -35,8 +35,8 @@ func NewServer(cfg config.ServerConfig, sim *simulator.Simulator, logger *slog.L
 	router.Use(middleware.CORS())
 
 	// Create handlers
-	healthHandler := handlers.NewHealthHandler(sim, logger)
-	commandHandler := handlers.NewCommandHandler(sim, logger)
+	healthHandler := handlers.NewHealthHandler(sim, logger, simCfg.TickRateHz)
+	commandHandler := handlers.NewCommandHandler(sim, logger, simCfg.MaxSpeed)
 	stateHandler := handlers.NewStateHandler(sim, logger)
 	streamHandler := handlers.NewStreamHandler(sim, logger)
 
