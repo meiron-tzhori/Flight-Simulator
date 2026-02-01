@@ -101,12 +101,6 @@ func (h *StreamHandler) Stream(c *gin.Context) {
 
 				// Flush to send immediately
 				flusher.Flush()
-
-				// Check if client disconnected
-				if c.Writer.Written() < 0 {
-					h.logger.Info("Client disconnected (write error)", "subscriber_id", subID)
-					return
-				}
 			}
 
 		case <-heartbeat.C:
