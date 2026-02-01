@@ -61,7 +61,11 @@ func TestSimulator_New(t *testing.T) {
 	// Start simulator to enable GetState
 	ctx2, cancel2 := context.WithCancel(context.Background())
 	defer cancel2()
-	go sim.Run(ctx2)
+	go func() {
+		if err := sim.Run(ctx2); err != nil {
+			t.Logf("Simulator Run error (expected on shutdown): %v", err)
+		}
+	}()
 	time.Sleep(50 * time.Millisecond)
 	
 	state, err := sim.GetState(ctx)
@@ -85,7 +89,11 @@ func TestSimulator_GetState(t *testing.T) {
 	
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	go sim.Run(ctx)
+	go func() {
+		if err := sim.Run(ctx); err != nil {
+			t.Logf("Simulator Run error (expected on shutdown): %v", err)
+		}
+	}()
 	time.Sleep(50 * time.Millisecond)
 	
 	getCtx, getCancel := context.WithTimeout(context.Background(), 1*time.Second)
@@ -118,7 +126,11 @@ func TestSimulator_SubmitCommand_GoTo(t *testing.T) {
 	
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	go sim.Run(ctx)
+	go func() {
+		if err := sim.Run(ctx); err != nil {
+			t.Logf("Simulator Run error (expected on shutdown): %v", err)
+		}
+	}()
 	time.Sleep(50 * time.Millisecond)
 	
 	cmd := models.NewCommand(models.CommandTypeGoTo)
@@ -163,7 +175,11 @@ func TestSimulator_SubmitCommand_Trajectory(t *testing.T) {
 	
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	go sim.Run(ctx)
+	go func() {
+		if err := sim.Run(ctx); err != nil {
+			t.Logf("Simulator Run error (expected on shutdown): %v", err)
+		}
+	}()
 	time.Sleep(50 * time.Millisecond)
 	
 	cmd := models.NewCommand(models.CommandTypeTrajectory)
@@ -222,7 +238,9 @@ func TestSimulator_Run_Context_Cancellation(t *testing.T) {
 	
 	done := make(chan bool)
 	go func() {
-		sim.Run(ctx)
+		if err := sim.Run(ctx); err != nil {
+			t.Logf("Simulator Run error (expected on shutdown): %v", err)
+		}
 		done <- true
 	}()
 	
