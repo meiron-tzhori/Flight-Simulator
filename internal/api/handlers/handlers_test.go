@@ -69,10 +69,10 @@ func setupRouter(sim *simulator.Simulator) *gin.Engine {
 	
 	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelWarn}))
 	
-	// Setup handlers
+	// Setup handlers with correct constructors
 	cmdHandler := NewCommandHandler(sim, logger, 250.0)
 	stateHandler := NewStateHandler(sim, logger)
-	healthHandler := NewHealthHandler()
+	healthHandler := NewHealthHandler(sim, logger, 10.0) // tickRate = 10 Hz
 	streamHandler := NewStreamHandler(sim, logger)
 	
 	router.GET("/health", healthHandler.Health)
@@ -99,13 +99,13 @@ func TestHealthHandler(t *testing.T) {
 		t.Errorf("Health() status = %d, want %d", w.Code, http.StatusOK)
 	}
 	
-	var response map[string]interface{}
+	var response models.HealthResponse
 	if err := json.NewDecoder(w.Body).Decode(&response); err != nil {
 		t.Fatalf("Failed to decode response: %v", err)
 	}
 	
-	if status, ok := response["status"].(string); !ok || status != "healthy" {
-		t.Errorf("Health() status = %v, want 'healthy'", response["status"])
+	if response.Status != "healthy" {
+		t.Errorf("Health() status = %v, want 'healthy'", response.Status)
 	}
 }
 
