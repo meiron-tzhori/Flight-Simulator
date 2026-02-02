@@ -65,7 +65,11 @@ class FlightSimulatorAPI {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(command),
+      body: JSON.stringify({
+        lat: command.latitude,
+        lon: command.longitude,
+        alt: command.altitude,
+      }),
     });
 
     if (!response.ok) {
@@ -88,7 +92,13 @@ class FlightSimulatorAPI {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ points }),
+      body: JSON.stringify({
+        waypoints: points.map(p => ({
+          lat: p.latitude,
+          lon: p.longitude,
+          alt: p.altitude,
+        })),
+      }),
     });
 
     if (!response.ok) {
@@ -129,7 +139,7 @@ class FlightSimulatorAPI {
       method: 'POST',
     });
 
-    if (!response.ok) {
+    if !response.ok) {
       const error = await response.text();
       throw new Error(`Hold command failed: ${error}`);
     }
