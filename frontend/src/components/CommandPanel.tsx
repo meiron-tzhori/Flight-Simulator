@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { api, GoToCommand, TrajectoryPoint } from '../services/api';
+import { api } from '../services/api';
+import type { GoToCommand, TrajectoryPoint } from '../services/api';
 import './CommandPanel.css';
 
 interface CommandPanelProps {
@@ -164,7 +165,7 @@ export function CommandPanel({ onCommandSent, onError }: CommandPanelProps) {
         {activeTab === 'goto' && (
           <form onSubmit={handleGoToSubmit} className="command-form">
             <div className="form-group">
-              <label htmlFor="goto-lat">Latitude (°)</label>
+              <label htmlFor="goto-lat">Latitude (\u00b0)</label>
               <input
                 id="goto-lat"
                 type="number"
@@ -178,7 +179,7 @@ export function CommandPanel({ onCommandSent, onError }: CommandPanelProps) {
             </div>
 
             <div className="form-group">
-              <label htmlFor="goto-lon">Longitude (°)</label>
+              <label htmlFor="goto-lon">Longitude (\u00b0)</label>
               <input
                 id="goto-lon"
                 type="number"
@@ -258,7 +259,7 @@ export function CommandPanel({ onCommandSent, onError }: CommandPanelProps) {
               className="control-button stop-button"
               disabled={isLoading}
             >
-              🛑 STOP
+              \ud83d\uded1 STOP
             </button>
             <p className="control-description">
               Immediately stop all movement and clear current command
@@ -269,7 +270,7 @@ export function CommandPanel({ onCommandSent, onError }: CommandPanelProps) {
               className="control-button hold-button"
               disabled={isLoading}
             >
-              ⏸️ HOLD
+              \u23f8\ufe0f HOLD
             </button>
             <p className="control-description">
               Hold current position (maintain altitude and coordinates)
