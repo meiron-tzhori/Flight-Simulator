@@ -1,4 +1,4 @@
-import { AircraftState } from '../services/api';
+import type { AircraftState } from '../services/api';
 import './AircraftStateDisplay.css';
 
 interface AircraftStateDisplayProps {
@@ -13,7 +13,7 @@ export function AircraftStateDisplay({ state, isConnected }: AircraftStateDispla
         <div className="state-header">
           <h2>Aircraft State</h2>
           <span className={`connection-status ${isConnected ? 'connected' : 'disconnected'}`}>
-            {isConnected ? '● Connected' : '○ Disconnected'}
+            {isConnected ? '\u25cf Connected' : '\u25cb Disconnected'}
           </span>
         </div>
         <div className="state-loading">
@@ -36,7 +36,7 @@ export function AircraftStateDisplay({ state, isConnected }: AircraftStateDispla
       <div className="state-header">
         <h2>Aircraft State</h2>
         <span className={`connection-status ${isConnected ? 'connected' : 'disconnected'}`}>
-          {isConnected ? '● Live' : '○ Disconnected'}
+          {isConnected ? '\u25cf Live' : '\u25cb Disconnected'}
         </span>
       </div>
 
@@ -46,11 +46,11 @@ export function AircraftStateDisplay({ state, isConnected }: AircraftStateDispla
           <h3>Position</h3>
           <div className="state-item">
             <span className="label">Latitude:</span>
-            <span className="value">{formatCoordinate(state.position.latitude)}°</span>
+            <span className="value">{formatCoordinate(state.position.latitude)}\u00b0</span>
           </div>
           <div className="state-item">
             <span className="label">Longitude:</span>
-            <span className="value">{formatCoordinate(state.position.longitude)}°</span>
+            <span className="value">{formatCoordinate(state.position.longitude)}\u00b0</span>
           </div>
           <div className="state-item">
             <span className="label">Altitude:</span>
@@ -84,7 +84,7 @@ export function AircraftStateDisplay({ state, isConnected }: AircraftStateDispla
           <h3>Flight Data</h3>
           <div className="state-item">
             <span className="label">Heading:</span>
-            <span className="value">{formatCoordinate(state.heading, 1)}°</span>
+            <span className="value">{formatCoordinate(state.heading, 1)}\u00b0</span>
           </div>
           {state.fuel !== undefined && (
             <div className="state-item">
