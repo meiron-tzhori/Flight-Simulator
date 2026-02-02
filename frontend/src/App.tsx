@@ -1,35 +1,87 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from 'react';
+import { AircraftStateDisplay } from './components/AircraftStateDisplay';
+import { CommandPanel } from './components/CommandPanel';
+import { useSSE } from './hooks/useSSE';
+import { api } from './services/api';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const { state, isConnected, error: sseError } = useSSE(api.getStreamUrl());
+  const [notifications, setNotifications] = useState<Array<{ id: number; message: string; type: 'success' | 'error' }>>([]);
+  const [notificationId, setNotificationId] = useState(0);
+
+  const addNotification = (message: string, type: 'success' | 'error') => {
+    const id = notificationId;
+    setNotificationId(id + 1);
+    setNotifications(prev => [...prev, { id, message, type }]);
+
+    // Auto-remove notification after 5 seconds
+    setTimeout(() => {
+      setNotifications(prev => prev.filter(n => n.id !== id));
+    }, 5000);
+  };
+
+  const handleCommandSent = (command: string) => {
+    addNotification(`✓ ${command}`, 'success');
+  };
+
+  const handleCommandError = (error: string) => {
+    addNotification(`✗ ${error}`, 'error');
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="app">
+      <header className="app-header">
+        <h1>✈️ Flight Simulator Dashboard</h1>
+        <div className="header-subtitle">
+          Real-time aircraft monitoring and control
+        </div>
+      </header>
+
+      {/* Notifications */}
+      {notifications.length > 0 && (
+        <div className="notifications">
+          {notifications.map(notification => (
+            <div
+              key={notification.id}
+              className={`notification notification-${notification.type}`}
+            >
+              {notification.message}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* SSE Connection Error */}
+      {sseError && (
+        <div className="error-banner">
+          <strong>Connection Error:</strong> {sseError}
+        </div>
+      )}
+
+      <main className="app-main">
+        <div className="dashboard-grid">
+          {/* Aircraft State Display */}
+          <section className="dashboard-section">
+            <AircraftStateDisplay state={state} isConnected={isConnected} />
+          </section>
+
+          {/* Command Panel */}
+          <section className="dashboard-section">
+            <CommandPanel
+              onCommandSent={handleCommandSent}
+              onError={handleCommandError}
+            />
+          </section>
+        </div>
+      </main>
+
+      <footer className="app-footer">
+        <div>Flight Simulator v1.0</div>
+        <div>Backend API: {api.getStreamUrl().replace('/stream', '')}</div>
+      </footer>
+    </div>
+  );
 }
 
-export default App
+export default App;
