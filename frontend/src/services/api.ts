@@ -9,14 +9,27 @@ export interface AircraftState {
     altitude: number;
   };
   velocity: {
-    north: number;
-    east: number;
-    down: number;
+    ground_speed: number;
+    vertical_speed: number;
   };
   heading: number;
   timestamp: string;
-  currentCommand?: string;
-  fuel?: number;
+  active_command?: {
+    type: string;
+    target?: {
+      latitude: number;
+      longitude: number;
+      altitude: number;
+    };
+    eta_seconds?: number;
+  };
+  environment?: {
+    wind?: {
+      direction: number;
+      speed: number;
+    };
+    humidity?: number;
+  };
 }
 
 export interface GoToCommand {
