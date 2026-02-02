@@ -26,15 +26,22 @@ export function useSSE(url: string): UseSSEReturn {
           setError(null);
         };
 
-        eventSource.onmessage = (event) => {
+        // Listen for 'state' events specifically (backend sends event: state)
+        eventSource.addEventListener('state', (event: MessageEvent) => {
           try {
             const data: AircraftState = JSON.parse(event.data);
+            console.log('Received state update:', data);
             setState(data);
           } catch (err) {
-            console.error('SSE parse error:', err);
+            console.error('SSE parse error:', err, 'Data:', event.data);
             setError('Failed to parse state data');
           }
-        };
+        });
+
+        // Also listen for 'connected' event
+        eventSource.addEventListener('connected', (event: MessageEvent) => {
+          console.log('Connection confirmed:', event.data);
+        });
 
         eventSource.onerror = () => {
           console.error('SSE connection error, attempting reconnect...');
