@@ -1,42 +1,65 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react';
+import { AircraftState } from '../services/api';
 
-interface AircraftState {
-  position: {
-    latitude: number
-    longitude: number
-    altitude: number
-  }
-  velocity: {
-    groundSpeed: number
-    verticalSpeed: number
-  }
-  heading: number
-  timestamp: string
+interface UseSSEReturn {
+  state: AircraftState | null;
+  isConnected: boolean;
+  error: string | null;
 }
 
-export function useSSE(): AircraftState | null {
-  const [state, setState] = useState<AircraftState | null>(null)
+export function useSSE(url: string): UseSSEReturn {
+  const [state, setState] = useState<AircraftState | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const eventSource = new EventSource('/stream')
+    let eventSource: EventSource | null = null;
+    let reconnectTimeout: NodeJS.Timeout;
 
-    eventSource.onmessage = (event) => {
+    const connect = () => {
       try {
-        const data = JSON.parse(event.data)
-        setState(data)
-      } catch (error) {
-        console.error('SSE parse error:', error)
-      }
-    }
+        eventSource = new EventSource(url);
 
-    eventSource.onerror = () => {
-      console.error('SSE connection lost, reconnecting...')
-    }
+        eventSource.onopen = () => {
+          console.log('SSE connected');
+          setIsConnected(true);
+          setError(null);
+        };
+
+        eventSource.onmessage = (event) => {
+          try {
+            const data: AircraftState = JSON.parse(event.data);
+            setState(data);
+          } catch (err) {
+            console.error('SSE parse error:', err);
+            setError('Failed to parse state data');
+          }
+        };
+
+        eventSource.onerror = () => {
+          console.error('SSE connection error, attempting reconnect...');
+          setIsConnected(false);
+          setError('Connection lost');
+          eventSource?.close();
+          
+          // Attempt reconnection after 3 seconds
+          reconnectTimeout = setTimeout(connect, 3000);
+        };
+      } catch (err) {
+        console.error('Failed to create EventSource:', err);
+        setError('Failed to connect to server');
+        setIsConnected(false);
+      }
+    };
+
+    connect();
 
     return () => {
-      eventSource.close()
-    }
-  }, [])
+      clearTimeout(reconnectTimeout);
+      eventSource?.close();
+      setIsConnected(false);
+    };
+  }, [url]);
 
-  return state
+  return { state, isConnected, error };
 }
