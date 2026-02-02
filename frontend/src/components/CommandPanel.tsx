@@ -165,7 +165,7 @@ export function CommandPanel({ onCommandSent, onError }: CommandPanelProps) {
         {activeTab === 'goto' && (
           <form onSubmit={handleGoToSubmit} className="command-form">
             <div className="form-group">
-              <label htmlFor="goto-lat">Latitude (\u00b0)</label>
+              <label htmlFor="goto-lat">Latitude (°)</label>
               <input
                 id="goto-lat"
                 type="number"
@@ -179,7 +179,7 @@ export function CommandPanel({ onCommandSent, onError }: CommandPanelProps) {
             </div>
 
             <div className="form-group">
-              <label htmlFor="goto-lon">Longitude (\u00b0)</label>
+              <label htmlFor="goto-lon">Longitude (°)</label>
               <input
                 id="goto-lon"
                 type="number"
@@ -259,7 +259,7 @@ export function CommandPanel({ onCommandSent, onError }: CommandPanelProps) {
               className="control-button stop-button"
               disabled={isLoading}
             >
-              \ud83d\uded1 STOP
+              🛑 STOP
             </button>
             <p className="control-description">
               Immediately stop all movement and clear current command
@@ -270,7 +270,7 @@ export function CommandPanel({ onCommandSent, onError }: CommandPanelProps) {
               className="control-button hold-button"
               disabled={isLoading}
             >
-              \u23f8\ufe0f HOLD
+              ⏸️ HOLD
             </button>
             <p className="control-description">
               Hold current position (maintain altitude and coordinates)
