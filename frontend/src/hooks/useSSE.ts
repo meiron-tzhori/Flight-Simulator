@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { AircraftState } from '../services/api';
+import type { AircraftState } from '../services/api';
 
 interface UseSSEReturn {
   state: AircraftState | null;
