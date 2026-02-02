@@ -13,7 +13,7 @@ export function AircraftStateDisplay({ state, isConnected }: AircraftStateDispla
         <div className="state-header">
           <h2>Aircraft State</h2>
           <span className={`connection-status ${isConnected ? 'connected' : 'disconnected'}`}>
-            {isConnected ? '\u25cf Connected' : '\u25cb Disconnected'}
+            {isConnected ? '● Connected' : '○ Disconnected'}
           </span>
         </div>
         <div className="state-loading">
@@ -33,7 +33,7 @@ export function AircraftStateDisplay({ state, isConnected }: AircraftStateDispla
       <div className="state-header">
         <h2>Aircraft State</h2>
         <span className={`connection-status ${isConnected ? 'connected' : 'disconnected'}`}>
-          {isConnected ? '\u25cf Live' : '\u25cb Disconnected'}
+          {isConnected ? '● Live' : '○ Disconnected'}
         </span>
       </div>
 
@@ -43,11 +43,11 @@ export function AircraftStateDisplay({ state, isConnected }: AircraftStateDispla
           <h3>Position</h3>
           <div className="state-item">
             <span className="label">Latitude:</span>
-            <span className="value">{formatNumber(state.position?.latitude, 6)}\u00b0</span>
+            <span className="value">{formatNumber(state.position?.latitude, 6)}°</span>
           </div>
           <div className="state-item">
             <span className="label">Longitude:</span>
-            <span className="value">{formatNumber(state.position?.longitude, 6)}\u00b0</span>
+            <span className="value">{formatNumber(state.position?.longitude, 6)}°</span>
           </div>
           <div className="state-item">
             <span className="label">Altitude:</span>
@@ -73,7 +73,7 @@ export function AircraftStateDisplay({ state, isConnected }: AircraftStateDispla
           <h3>Flight Data</h3>
           <div className="state-item">
             <span className="label">Heading:</span>
-            <span className="value">{formatNumber(state.heading, 1)}\u00b0</span>
+            <span className="value">{formatNumber(state.heading, 1)}°</span>
           </div>
           {state.active_command && (
             <div className="state-item state-item-highlight">
@@ -97,7 +97,7 @@ export function AircraftStateDisplay({ state, isConnected }: AircraftStateDispla
               <>
                 <div className="state-item">
                   <span className="label">Wind Direction:</span>
-                  <span className="value">{formatNumber(state.environment.wind.direction, 0)}\u00b0</span>
+                  <span className="value">{formatNumber(state.environment.wind.direction, 0)}°</span>
                 </div>
                 <div className="state-item">
                   <span className="label">Wind Speed:</span>
