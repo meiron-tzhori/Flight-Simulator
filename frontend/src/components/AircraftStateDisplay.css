@@ -1,0 +1,126 @@
+.aircraft-state {
+  background: #1e1e1e;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.state-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #333;
+}
+
+.state-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #fff;
+}
+
+.connection-status {
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.connection-status.connected {
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.1);
+}
+
+.connection-status.disconnected {
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.1);
+}
+
+.state-loading {
+  text-align: center;
+  padding: 2rem;
+  color: #888;
+  font-size: 1rem;
+}
+
+.state-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.state-section {
+  background: #252525;
+  border-radius: 6px;
+  padding: 1rem;
+}
+
+.state-section h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  color: #60a5fa;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.state-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #333;
+}
+
+.state-item:last-child {
+  border-bottom: none;
+}
+
+.state-item .label {
+  color: #aaa;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.state-item .value {
+  color: #fff;
+  font-family: 'Courier New', monospace;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.state-item-highlight {
+  background: rgba(96, 165, 250, 0.1);
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-top: 0.5rem;
+}
+
+.command-value {
+  color: #fbbf24;
+}
+
+.timestamp-value {
+  color: #a78bfa;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .state-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .aircraft-state {
+    padding: 1rem;
+  }
+  
+  .state-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
