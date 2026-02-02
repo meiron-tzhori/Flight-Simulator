@@ -139,7 +139,7 @@ class FlightSimulatorAPI {
       method: 'POST',
     });
 
-    if !response.ok) {
+    if (!response.ok) {
       const error = await response.text();
       throw new Error(`Hold command failed: ${error}`);
     }
