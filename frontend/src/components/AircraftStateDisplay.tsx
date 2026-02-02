@@ -23,12 +23,9 @@ export function AircraftStateDisplay({ state, isConnected }: AircraftStateDispla
     );
   }
 
-  const formatCoordinate = (value: number, decimals: number = 6): string => {
+  const formatNumber = (value: number | undefined, decimals: number = 2): string => {
+    if (value === undefined || value === null) return 'N/A';
     return value.toFixed(decimals);
-  };
-
-  const formatVelocity = (vel: { north: number; east: number; down: number }): number => {
-    return Math.sqrt(vel.north ** 2 + vel.east ** 2 + vel.down ** 2);
   };
 
   return (
@@ -46,36 +43,28 @@ export function AircraftStateDisplay({ state, isConnected }: AircraftStateDispla
           <h3>Position</h3>
           <div className="state-item">
             <span className="label">Latitude:</span>
-            <span className="value">{formatCoordinate(state.position.latitude)}\u00b0</span>
+            <span className="value">{formatNumber(state.position?.latitude, 6)}\u00b0</span>
           </div>
           <div className="state-item">
             <span className="label">Longitude:</span>
-            <span className="value">{formatCoordinate(state.position.longitude)}\u00b0</span>
+            <span className="value">{formatNumber(state.position?.longitude, 6)}\u00b0</span>
           </div>
           <div className="state-item">
             <span className="label">Altitude:</span>
-            <span className="value">{formatCoordinate(state.position.altitude, 2)} m</span>
+            <span className="value">{formatNumber(state.position?.altitude, 2)} m</span>
           </div>
         </div>
 
         {/* Velocity Section */}
         <div className="state-section">
           <h3>Velocity</h3>
-          <div className="state-item">
-            <span className="label">North:</span>
-            <span className="value">{formatCoordinate(state.velocity.north, 2)} m/s</span>
-          </div>
-          <div className="state-item">
-            <span className="label">East:</span>
-            <span className="value">{formatCoordinate(state.velocity.east, 2)} m/s</span>
-          </div>
-          <div className="state-item">
-            <span className="label">Down:</span>
-            <span className="value">{formatCoordinate(state.velocity.down, 2)} m/s</span>
-          </div>
           <div className="state-item state-item-highlight">
             <span className="label">Ground Speed:</span>
-            <span className="value">{formatCoordinate(formatVelocity(state.velocity), 2)} m/s</span>
+            <span className="value">{formatNumber(state.velocity?.ground_speed, 2)} m/s</span>
+          </div>
+          <div className="state-item">
+            <span className="label">Vertical Speed:</span>
+            <span className="value">{formatNumber(state.velocity?.vertical_speed, 2)} m/s</span>
           </div>
         </div>
 
@@ -84,21 +73,46 @@ export function AircraftStateDisplay({ state, isConnected }: AircraftStateDispla
           <h3>Flight Data</h3>
           <div className="state-item">
             <span className="label">Heading:</span>
-            <span className="value">{formatCoordinate(state.heading, 1)}\u00b0</span>
+            <span className="value">{formatNumber(state.heading, 1)}\u00b0</span>
           </div>
-          {state.fuel !== undefined && (
-            <div className="state-item">
-              <span className="label">Fuel:</span>
-              <span className="value">{formatCoordinate(state.fuel, 1)}%</span>
+          {state.active_command && (
+            <div className="state-item state-item-highlight">
+              <span className="label">Active Command:</span>
+              <span className="value command-value">{state.active_command.type}</span>
             </div>
           )}
-          {state.currentCommand && (
-            <div className="state-item state-item-highlight">
-              <span className="label">Current Command:</span>
-              <span className="value command-value">{state.currentCommand}</span>
+          {state.active_command?.eta_seconds !== undefined && (
+            <div className="state-item">
+              <span className="label">ETA:</span>
+              <span className="value">{Math.round(state.active_command.eta_seconds)}s</span>
             </div>
           )}
         </div>
+
+        {/* Environment Section */}
+        {state.environment && (
+          <div className="state-section">
+            <h3>Environment</h3>
+            {state.environment.wind && (
+              <>
+                <div className="state-item">
+                  <span className="label">Wind Direction:</span>
+                  <span className="value">{formatNumber(state.environment.wind.direction, 0)}\u00b0</span>
+                </div>
+                <div className="state-item">
+                  <span className="label">Wind Speed:</span>
+                  <span className="value">{formatNumber(state.environment.wind.speed, 1)} m/s</span>
+                </div>
+              </>
+            )}
+            {state.environment.humidity !== undefined && (
+              <div className="state-item">
+                <span className="label">Humidity:</span>
+                <span className="value">{formatNumber(state.environment.humidity, 0)}%</span>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Timestamp Section */}
         <div className="state-section">
